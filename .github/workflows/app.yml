@@ -62,7 +62,7 @@ jobs:
           git clone https://github.com/destan19/OpenAppFilter package/OpenAppFilter
           
           # smartdns
-          svn checkout https://github.com/pymumu/smartdns/tree/master/package/openwrt package/smartdns
+          svn checkout https://github.com/pymumu/smartdns/trunk/package/openwrt package/smartdns
           sed -i 's/d51f5e6eeba7bfde1b108fe32d540bd429550573/d6c34658af0d4aac94655a139030c5ec12884754/g' package/smartdns/Makefile
           sed -i 's/1\.2019\.11\.02-1102/1.2019.12.15-28/g' package/smartdns/Makefile
 
