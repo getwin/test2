@@ -95,7 +95,6 @@ jobs:
           CONFIG_V2RAY_EXCLUDE_V2CTL=y
           CONFIG_V2RAY_EXCLUDE_ASSETS=y
           CONFIG_V2RAY_COMPRESS_UPX=y
-          # CONFIG_V2RAY_COMPRESS_UPX is not set
           EOF
 
           sed -i 's/^[ \t]*//g' ./.config
