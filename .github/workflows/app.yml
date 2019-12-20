@@ -57,6 +57,8 @@ jobs:
           git clone https://github.com/kuoruan/luci-app-v2ray package/luci-app-v2ray
           # upx压缩等级改为速度最优的 compress faster
           sed -i 's/--ultra-brute/-1/g' package/v2ray-core/Makefile
+          # bug fix
+          sed -i 's/mv -f $(DL_DIR)\/$(GEO/#mv -f $(DL_DIR)\/$(GEO/g' package/v2ray-core/Makefile
 
           # # OpenAppFilter
           # git clone https://github.com/destan19/OpenAppFilter package/OpenAppFilter
