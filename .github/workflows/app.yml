@@ -34,7 +34,7 @@ jobs:
           SDK_NAME: openwrt-sdk-19.07.0-rc2-bcm53xx_gcc-7.5.0_musl_eabi.Linux-x86_64
           SDK_URL: https://downloads.openwrt.org/releases/19.07.0-rc2/targets/bcm53xx/generic
         run: |
-          wget -q --no-check-certificate ${SDK_URL}/${SDK_NAME}.tar.xz
+          wget -q ${SDK_URL}/${SDK_NAME}.tar.xz
           xz -d ${SDK_NAME}.tar.xz
           tar -xf ${SDK_NAME}.tar
           mv $SDK_NAME openwrt
@@ -52,24 +52,27 @@ jobs:
           # git clone https://github.com/qq523407234/openwrt-udp2raw package/udp2raw-tunnel
           # git clone https://github.com/qq523407234/luci-app-udp2raw package/luci-app-udp2raw
           
-          # # v2ray
-          # git clone https://github.com/kuoruan/openwrt-v2ray package/v2ray-core
-          # git clone https://github.com/kuoruan/luci-app-v2ray package/luci-app-v2ray
-          # # upx压缩等级改为速度最优的 compress faster
-          # sed -i 's/--ultra-brute/-1/g' package/v2ray-core/Makefile
+          # v2ray
+          git clone https://github.com/kuoruan/openwrt-v2ray package/v2ray-core
+          git clone https://github.com/kuoruan/luci-app-v2ray package/luci-app-v2ray
+          # upx压缩等级改为速度最优的 compress faster
+          sed -i 's/--ultra-brute/-1/g' package/v2ray-core/Makefile
+          # 版本改为 4.20.0
+          sed -i 's/4.21.3/4.20.0/g' package/v2ray-core/Makefile
+          sed -i 's/2052ea02ec5569b32748e5c859dcd066fa3818d5caafa70ddaf216576aaec188/579a7098b8f6cc68c3f94c5453fa274299f8b072736f364654298bd4cf57d24e/g' package/v2ray-core/Makefile
 
           # # OpenAppFilter
           # git clone https://github.com/destan19/OpenAppFilter package/OpenAppFilter
           
-          # smartdns
-          svn checkout https://github.com/coolexa/smartdns/trunk/package/openwrt package/smartdns
-          git clone https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
+          # # smartdns
+          # svn checkout https://github.com/coolexa/smartdns/trunk/package/openwrt package/smartdns
+          # git clone https://github.com/coolexa/luci-app-smartdns package/luci-app-smartdns
 
       - name: 构建编译扩展环境
         run: |
           cd openwrt
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          ./scripts/feeds update -a >/dev/null
+          ./scripts/feeds install -a >/dev/null
 
       - name: 插件选择
         run: |
@@ -77,28 +80,28 @@ jobs:
           rm -f ./.config*
           touch ./.config
 
-          # cat >> .config <<EOF
-          # CONFIG_PACKAGE_luci-app-vlmcsd=y
-          # CONFIG_PACKAGE_luci-app-oaf=y
-          # CONFIG_PACKAGE_smartdns=y
-          # CONFIG_PACKAGE_udp2raw-tunnel=y
-          # CONFIG_PACKAGE_luci-app-udp2raw=y
-          # CONFIG_PACKAGE_luci-app-v2ray=y
-          # CONFIG_PACKAGE_v2ray-core=y
-          # #
-          # # V2Ray Configuration
-          # #
-          # # CONFIG_V2RAY_JSON_V2CTL is not set
-          # CONFIG_V2RAY_JSON_INTERNAL=y
-          # # CONFIG_V2RAY_JSON_NONE is not set
-          # CONFIG_V2RAY_EXCLUDE_V2CTL=y
-          # CONFIG_V2RAY_EXCLUDE_ASSETS=y
-          # CONFIG_V2RAY_COMPRESS_UPX=y
-          # EOF
-
           cat >> .config <<EOF
+          CONFIG_PACKAGE_luci-app-vlmcsd=y
+          CONFIG_PACKAGE_luci-app-oaf=y
+          CONFIG_PACKAGE_smartdns=y
+          CONFIG_PACKAGE_udp2raw-tunnel=y
+          CONFIG_PACKAGE_luci-app-udp2raw=y
           CONFIG_PACKAGE_smartdns=y
           CONFIG_PACKAGE_luci-app-smartdns=y
+          EOF
+
+          cat >> .config <<EOF
+          CONFIG_PACKAGE_luci-app-v2ray=y
+          CONFIG_PACKAGE_v2ray-core=y
+          #
+          # V2Ray Configuration
+          #
+          # CONFIG_V2RAY_JSON_V2CTL is not set
+          CONFIG_V2RAY_JSON_INTERNAL=y
+          # CONFIG_V2RAY_JSON_NONE is not set
+          CONFIG_V2RAY_EXCLUDE_V2CTL=y
+          CONFIG_V2RAY_EXCLUDE_ASSETS=y
+          CONFIG_V2RAY_COMPRESS_UPX=y
           EOF
 
           sed -i 's/^[ \t]*//g' ./.config
@@ -121,17 +124,17 @@ jobs:
       #     cd openwrt
       #     make package/luci-app-oaf/compile -j$(nproc) V=s
 
-      - name: 进行编译-4
-        run: |
-          cd openwrt
-          make package/smartdns/compile -j$(nproc) V=s
-          make package/luci-app-smartdns/compile -j$(nproc) V=s
-
-      # - name: 进行编译-5
+      # - name: 进行编译-4
       #   run: |
-      #     cd openwrt   
-      #     make package/v2ray-core/compile -j$(nproc) V=s
-      #     make package/luci-app-v2ray/compile -j$(nproc) V=s
+      #     cd openwrt
+      #     make package/smartdns/compile -j$(nproc) V=s
+      #     make package/luci-app-smartdns/compile -j$(nproc) V=s
+
+      - name: 进行编译-5
+        run: |
+          cd openwrt   
+          make package/v2ray-core/compile -j$(nproc) V=s
+          # make package/luci-app-v2ray/compile -j$(nproc) V=s
 
 
       # - name: 简单清理
