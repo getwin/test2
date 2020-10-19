@@ -122,7 +122,7 @@ jobs:
           # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Server is not set
           # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray is not set
           CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
-          CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
+          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO=y
           # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook is not set
           # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy is not set
           # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_kcptun is not set
@@ -165,10 +165,10 @@ jobs:
       #     make package/v2ray-core/compile -j$(nproc) V=s
       #     # make package/luci-app-v2ray/compile -j$(nproc) V=s
 
-      - name: 进行编译-6
-        run: |
-          cd openwrt   
-          make package/trojan/compile -j$(nproc)
+      # - name: 进行编译-6
+      #   run: |
+      #     cd openwrt   
+      #     make package/trojan/compile -j$(nproc)
       
       # - name: 进行编译-7
       #   run: |
