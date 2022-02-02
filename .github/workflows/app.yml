@@ -29,10 +29,8 @@ jobs:
           sudo -E apt-get -y install wget build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
       - name: 下载SDK
         env:
-          # SDK_NAME: openwrt-sdk-19.07.0-rc2-bcm53xx_gcc-7.5.0_musl_eabi.Linux-x86_64
-          # SDK_URL: https://downloads.openwrt.org/releases/19.07.0-rc2/targets/bcm53xx/generic
-          SDK_NAME: openwrt-sdk-19.07.2-bcm53xx_gcc-7.5.0_musl_eabi.Linux-x86_64
-          SDK_URL: https://downloads.openwrt.org/releases/19.07.2/targets/bcm53xx/generic
+          SDK_NAME: openwrt-sdk-21.02.1-bcm53xx_gcc-8.4.0_musl_eabi.Linux-x86_64
+          SDK_URL: https://downloads.openwrt.org/releases/21.02.1/targets/bcm53xx/generic
         run: |
           wget -q ${SDK_URL}/${SDK_NAME}.tar.xz
           xz -d ${SDK_NAME}.tar.xz
@@ -41,13 +39,24 @@ jobs:
       - name: 构建自定义文件结构
         run: |
           cd openwrt
-          # # KMS
-          # git clone https://github.com/flytosky-f/openwrt-vlmcsd package/vlmcsd
-          # # git clone https://github.com/flytosky-f/luci-app-vlmcsd package/luci-app-vlmcsd
-          # svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/luci-app-vlmcsd package/luci-app-vlmcsd
+
+          cp /usr/bin/upx staging_dir/host/bin
+
+          # k3screenctrl
+          svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/k3screenctrl package/k3screenctrl
+
+          # KMS
+          svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/vlmcsd package/vlmcsd
+          svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/luci-app-vlmcsd package/luci-app-vlmcsd
+
+          # aliyundrive-webdav
+          svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/aliyundrive-webdav package/aliyundrive-webdav
+          svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/luci-app-aliyundrive-webdav package/luci-app-aliyundrive-webdav
+
           # # udp2raw-tunnel
           # git clone https://github.com/qq523407234/openwrt-udp2raw package/udp2raw-tunnel
           # git clone https://github.com/qq523407234/luci-app-udp2raw package/luci-app-udp2raw
+
           # # v2ray
           # git clone --branch v4.20.0-4 https://github.com/kuoruan/openwrt-v2ray package/v2ray-core
           # git clone https://github.com/kuoruan/luci-app-v2ray package/luci-app-v2ray
@@ -55,11 +64,14 @@ jobs:
           # sed -i 's/--ultra-brute/-1/g' package/v2ray-core/Makefile
           # # bug fix
           # sed -i 's/mv -f $(DL_DIR)\/$(GEO/#mv -f $(DL_DIR)\/$(GEO/g' package/v2ray-core/Makefile
+
           # # OpenAppFilter
           # git clone https://github.com/destan19/OpenAppFilter package/OpenAppFilter
+
           # # smartdns
           # svn checkout https://github.com/coolexa/smartdns-lite/trunk/package/openwrt package/smartdns
           # git clone https://github.com/coolexa/luci-app-smartdns package/luci-app-smartdns
+
           # trojan
           # git clone https://github.com/coolexa/openwrt-trojan package/openwrt-trojan
           # # luci-app-passwall
@@ -68,114 +80,40 @@ jobs:
           # EOF
 
           # luci-app-passwall
-          svn checkout https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-app-passwall package/luci-app-passwall
-          svn checkout https://github.com/xiaorouji/openwrt-package/trunk/package package/luci-app-passwall-dep
+          #git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
+          echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall" >> feeds.conf.default
 
 
       - name: 构建编译扩展环境
         run: |
           cd openwrt
           ./scripts/feeds update -a >/dev/null
-          ./scripts/feeds install -a >/dev/null
+          # ./scripts/feeds install -a >/dev/null
+          ./scripts/feeds install luci-app-passwall
+
       - name: 插件选择
         run: |
           cd openwrt
-          rm -f ./.config*
-          touch ./.config
-          
-          # cat >> .config <<EOF
-          # CONFIG_PACKAGE_luci-app-vlmcsd=y
-          # CONFIG_PACKAGE_luci-app-oaf=y
-          # CONFIG_PACKAGE_smartdns=y
-          # CONFIG_PACKAGE_udp2raw-tunnel=y
-          # CONFIG_PACKAGE_luci-app-udp2raw=y
-          # CONFIG_PACKAGE_smartdns=y
-          # CONFIG_PACKAGE_luci-app-smartdns=y
-          # EOF
-          
-          # cat >> .config <<EOF
-          # CONFIG_PACKAGE_luci-app-v2ray=y
-          # CONFIG_PACKAGE_v2ray-core=y
-          # #
-          # # V2Ray Configuration
-          # #
-          # # CONFIG_V2RAY_JSON_V2CTL is not set
-          # CONFIG_V2RAY_JSON_INTERNAL=y
-          # # CONFIG_V2RAY_JSON_NONE is not set
-          # CONFIG_V2RAY_EXCLUDE_V2CTL=y
-          # CONFIG_V2RAY_EXCLUDE_ASSETS=y
-          # CONFIG_V2RAY_COMPRESS_UPX=y
-          # EOF
-          
-          cat >> .config <<EOF
-          CONFIG_PACKAGE_trojan=y
-          EOF
-          
-          cat >> .config <<EOF
-          CONFIG_PACKAGE_luci-app-passwall=y
-          #
-          # Configuration
-          #
-          CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks=y
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Server is not set
-          CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR=y
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Server is not set
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray is not set
-          CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_Plus=y
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Trojan_GO is not set
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Brook is not set
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy is not set
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_kcptun is not set
-          CONFIG_PACKAGE_luci-app-passwall_INCLUDE_haproxy=y
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ChinaDNS_NG is not set
-          CONFIG_PACKAGE_luci-app-passwall_INCLUDE_https_dns_proxy=y
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_dns2socks is not set
-          # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_v2ray-plugin is not set
-          CONFIG_PACKAGE_luci-app-passwall_INCLUDE_simple-obfs=y
-          EOF
-          
-          sed -i 's/^[ \t]*//g' ./.config
           make defconfig
-      # - name: 进行编译-1
-      #   run: |
-      #     cd openwrt
-      #     make package/vlmcsd/compile -j$(nproc) V=s
-      #     make package/luci-app-vlmcsd/compile -j$(nproc) V=s
 
-      # - name: 进行编译-2
-      #   run: |
-      #     cd openwrt
-      #     make package/udp2raw-tunnel/compile -j$(nproc) V=s
-      #     make package/luci-app-udp2raw/compile -j$(nproc) V=s
+      - name: 进行编译-1
+        run: |
+          cd openwrt
+          make package/vlmcsd/compile -j$(nproc)
+          make package/luci-app-vlmcsd/compile -j$(nproc)
 
-      # - name: 进行编译-3
-      #   run: |
-      #     cd openwrt
-      #     make package/luci-app-oaf/compile -j$(nproc) V=s
+      - name: 进行编译-2
+        run: |
+          cd openwrt
+          make package/aliyundrive-webdav/compile -j$(nproc)
+          make package/luci-app-aliyundrive-webdav/compile -j$(nproc)
 
-      # - name: 进行编译-4
-      #   run: |
-      #     cd openwrt
-      #     make package/smartdns/compile -j$(nproc) V=s
-      #     make package/luci-app-smartdns/compile -j$(nproc) V=s
+      - name: 进行编译-3
+        run: |
+          cd openwrt
+          make package/k3screenctrl/compile -j$(nproc)
 
-      # - name: 进行编译-5
-      #   run: |
-      #     cd openwrt   
-      #     make package/v2ray-core/compile -j$(nproc) V=s
-      #     # make package/luci-app-v2ray/compile -j$(nproc) V=s
-
-      # - name: 进行编译-6
-      #   run: |
-      #     cd openwrt   
-      #     make package/trojan/compile -j$(nproc)
-      
-      # - name: 进行编译-7
-      #   run: |
-      #     cd openwrt   
-      #     make package/feeds/lienol/luci-app-passwall/compile -j$(nproc)
-
-      - name: 进行编译-7
+      - name: 进行编译-4
         run: |
           cd openwrt   
           make package/luci-app-passwall/compile -j$(nproc)
