@@ -29,7 +29,7 @@ jobs:
           sudo -E apt-get -y install wget build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
       - name: 下载SDK
         env:
-          SDK_NAME: openwrt-sdk-21.02.1-bcm53xx_gcc-8.4.0_musl_eabi.Linux-x86_64
+          SDK_NAME: openwrt-sdk-21.02.1-bcm53xx-generic_gcc-8.4.0_musl_eabi.Linux-x86_64
           SDK_URL: https://downloads.openwrt.org/releases/21.02.1/targets/bcm53xx/generic
         run: |
           wget -q ${SDK_URL}/${SDK_NAME}.tar.xz
